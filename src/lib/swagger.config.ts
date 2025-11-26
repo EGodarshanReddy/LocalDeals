@@ -6,6 +6,8 @@ const getServerUrl = () => {
   // For Vercel deployments, use the VERCEL_URL
   if (process.env.VERCEL_URL) {
     const protocol = process.env.VERCEL_ENV === 'production' ? 'https' : 'http';
+    console.log('Using protocol:',protocol);
+    console.log('Using VERCEL_URL for Swagger server URL:', process.env.VERCEL_URL);
     return `${protocol}://${process.env.VERCEL_URL}`;
   }
   
