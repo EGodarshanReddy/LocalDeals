@@ -1,0 +1,179 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                  Int       @id @default(autoincrement())
+  phone               String?   @unique
+  firstName           String?
+  lastName            String?
+  email               String    @unique
+  password            String
+  role                String    @default("BUYER")
+  userType            String?    
+  zipCode             String?
+  favoriteCategories  String[]
+  isVerified          Boolean   @default(false)
+  createdAt           DateTime  @default(now())
+
+  partnerStores       PartnerStore[]
+  visits              Visit[]
+  reviews             Review[]
+  rewards             Reward[]
+  redemptions         Redemption[]
+  referrals           Referral[] @relation("Referrer")
+  notifications       Notification[]
+}
+
+model PartnerStore {
+  id               Int       @id @default(autoincrement())
+  userId           Int
+  name             String
+  description      String?
+  contactPhone     String
+  location         String
+  latitude         String?
+  longitude        String?
+  categories       String[]
+  businessHours    Json?
+  priceRating      Int        @default(1)
+  upiId            String?
+  images           String[]
+  servicesOffered  String[]
+  createdAt        DateTime   @default(now())
+
+  user             User       @relation(fields: [userId], references: [id])
+  deals            Deal[]
+  visits           Visit[]
+  reviews          Review[]
+  redemptions      Redemption[]
+  partnerStats     PartnerStat[]
+}
+
+model Deal {
+  id                 Int       @id @default(autoincrement())
+  partnerId          Int
+  name               String
+  description        String?
+  startDate          DateTime
+  endDate            DateTime
+  dealType           String
+  discountPercentage Int?
+  category           String
+  images             String[]
+  isActive           Boolean   @default(true)
+  createdAt          DateTime  @default(now())
+
+  partner            PartnerStore @relation(fields: [partnerId], references: [id])
+  visits             Visit[]
+}
+
+model Visit {
+  id               Int       @id @default(autoincrement())
+  userId           Int
+  partnerId        Int
+  visitDate        DateTime
+  notes            String?
+  dealId           Int?
+  status           String     @default("scheduled")
+  markedAsVisited  Boolean    @default(false)
+  createdAt        DateTime   @default(now())
+
+  user             User         @relation(fields: [userId], references: [id])
+  partner          PartnerStore @relation(fields: [partnerId], references: [id])
+  deal             Deal?        @relation(fields: [dealId], references: [id])
+}
+
+model Review {
+  id           Int       @id @default(autoincrement())
+  userId       Int
+  partnerId    Int
+  rating       Int
+  comment      String?
+  isPublished  Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+
+  user         User         @relation(fields: [userId], references: [id])
+  partner      PartnerStore @relation(fields: [partnerId], references: [id])
+}
+
+model Reward {
+  id           Int       @id @default(autoincrement())
+  userId       Int
+  points       Int
+  reason       String
+  referenceId  Int?
+  createdAt    DateTime   @default(now())
+
+  user         User       @relation(fields: [userId], references: [id])
+}
+
+model Redemption {
+  id           Int       @id @default(autoincrement())
+  userId       Int
+  partnerId    Int
+  points       Int
+  amount       Int
+  proofImageUrl String?
+  code          String
+  status        String     @default("pending")
+  createdAt     DateTime   @default(now())
+
+  user          User         @relation(fields: [userId], references: [id])
+  partner       PartnerStore @relation(fields: [partnerId], references: [id])
+}
+
+model Referral {
+  id             Int      @id @default(autoincrement())
+  referrerId     Int
+  referredPhone  String
+  status         String    @default("pending")
+  createdAt      DateTime  @default(now())
+
+  referrer       User      @relation("Referrer", fields: [referrerId], references: [id])
+}
+
+model Otp {
+  id          Int       @id @default(autoincrement())
+  identifier  String    @unique
+  code        String
+  expiresAt   DateTime
+  createdAt   DateTime  @default(now())
+}
+
+model Notification {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  title       String
+  message     String
+  isRead      Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id])
+}
+
+model PartnerStat {
+  id              Int      @id @default(autoincrement())
+  partnerId       Int
+  date            DateTime
+  storeViews      Int      @default(0)
+  dealViews       Int      @default(0)
+  scheduledVisits Int      @default(0)
+  actualVisits    Int      @default(0)
+
+  partner         PartnerStore @relation(fields: [partnerId], references: [id])
+
+  @@unique([partnerId, date])
+}
+

@@ -1,0 +1,6 @@
+export enum ROLES{
+    ADMIN="ADMIN",
+    BUYER="BUYER",
+    SELLER="SELLER",
+    VISITOR="VISITOR"
+}
