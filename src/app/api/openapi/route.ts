@@ -5,6 +5,11 @@ export async function GET(req: NextRequest) {
   try {
     const spec = getSwaggerSpec();
     
+    // Ensure we have a valid spec with paths
+    if (!spec || !spec.paths || Object.keys(spec.paths).length === 0) {
+      console.warn('[OpenAPI] No endpoints found in swagger spec');
+    }
+    
     // Check if client wants YAML
     const acceptHeader = req.headers.get('accept') || '';
     if (acceptHeader.includes('application/yaml') || acceptHeader.includes('text/yaml')) {
@@ -13,6 +18,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(spec, {
         headers: {
           'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
         },
       });
     }
@@ -20,14 +26,33 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(spec, {
       headers: {
         'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
       },
     });
   } catch (error) {
-    console.error('Error generating OpenAPI spec:', error);
+    console.error('[OpenAPI] Error generating OpenAPI spec:', error);
     return NextResponse.json(
-      { error: 'Failed to generate API documentation' },
-      { status: 500 }
+      { 
+        error: 'Failed to generate API documentation',
+        message: error instanceof Error ? error.message : 'Unknown error'
+      },
+      { 
+        status: 500,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+        },
+      }
     );
   }
+}
+
+export async function OPTIONS(req: NextRequest) {
+  return NextResponse.json(null, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type',
+    },
+  });
 }
 

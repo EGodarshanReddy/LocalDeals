@@ -1,3 +1,18 @@
+const getServerUrl = () => {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
+  
+  // For Vercel deployments, use the VERCEL_URL
+  if (process.env.VERCEL_URL) {
+    const protocol = process.env.VERCEL_ENV === 'production' ? 'https' : 'http';
+    return `${protocol}://${process.env.VERCEL_URL}`;
+  }
+  
+  // Default to localhost for development
+  return 'http://localhost:3000';
+};
+
 export const swaggerDefinition = {
   openapi: '3.0.0',
   info: {
@@ -10,12 +25,8 @@ export const swaggerDefinition = {
   },
   servers: [
     {
-      url: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
-      description: 'Development server',
-    },
-    {
-      url: 'https://api.shoppulse.com',
-      description: 'Production server',
+      url: getServerUrl(),
+      description: process.env.NODE_ENV === 'production' ? 'Production server' : 'Development server',
     },
   ],
   components: {
@@ -108,8 +119,8 @@ export const swaggerDefinition = {
 export const swaggerOptions = {
   definition: swaggerDefinition,
   apis: [
-    process.cwd() + '/src/app/api/**/*.ts',
-    process.cwd() + '/src/app/api/**/route.ts',
+    'src/app/api/**/*.ts',
+    'src/app/api/**/route.ts',
   ],
 };
 

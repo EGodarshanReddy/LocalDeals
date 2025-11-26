@@ -8,9 +8,32 @@ export function getSwaggerSpec() {
     return cachedSpec;
   }
 
-  const spec = swaggerJsdoc(swaggerOptions);
-  cachedSpec = spec;
-  return spec;
+  try {
+    const spec: any = swaggerJsdoc(swaggerOptions);
+    
+    // Ensure paths object exists
+    if (!spec.paths) {
+      spec.paths = {};
+    }
+    
+    // Log the number of endpoints found for debugging
+    const pathCount = Object.keys(spec.paths).length;
+    console.log(`[Swagger] Found ${pathCount} API endpoints`);
+    
+    cachedSpec = spec;
+    return spec;
+  } catch (error) {
+    console.error('[Swagger] Error generating OpenAPI spec:', error);
+    // Return a minimal valid spec if generation fails
+    return {
+      openapi: '3.0.0',
+      info: {
+        title: 'ShopPulse API',
+        version: '1.0.0',
+      },
+      paths: {},
+    };
+  }
 }
 
 export function getSwaggerSpecAsYaml(): string {
