@@ -65,6 +65,26 @@ After deployment, verify everything is working:
 
 ## 🐛 Troubleshooting
 
+### Issue: Can't test API endpoints in Swagger UI (endpoints don't expand/work)
+
+**This is the most common issue!**
+
+**Root Cause**: The server URL in Swagger UI was using build-time environment variables that aren't available at runtime on Vercel.
+
+**Solution**: The code has been updated to automatically detect the server URL at runtime using `window.location.origin`. 
+
+**Steps to Fix**:
+1. **Redeploy your application** to Vercel (the updated code will fix the issue)
+2. After deployment, open your browser's Developer Console (F12)
+3. Navigate to `/swagger`
+4. Check the console for: `[Swagger] Server URL set to: https://your-app.vercel.app`
+5. Try testing an endpoint - it should now work!
+
+**If still not working**, manually set the environment variable:
+1. Go to Vercel Dashboard → Your Project → Settings → Environment Variables
+2. Add `NEXT_PUBLIC_API_URL` = `https://your-actual-deployment-url.vercel.app`
+3. Redeploy the application
+
 ### Issue: API endpoints not showing in Swagger
 
 **Solution**: Check Vercel deployment logs:
@@ -78,12 +98,23 @@ After deployment, verify everything is working:
 **Solution**: CORS headers are already configured. If you still get errors:
 - Ensure your requests include proper `Authorization` header for protected endpoints
 - Check that the request body format matches the API documentation
+- Verify the request is going to the correct URL (check browser Network tab)
+
+### Issue: 404 errors when testing endpoints
+
+**Solution**: 
+1. Verify the endpoint path is correct in the Swagger spec
+2. Check that the API route file exists in `src/app/api/`
+3. Ensure the route exports the correct HTTP method (GET, POST, etc.)
+4. Check Vercel deployment logs for any build errors
 
 ### Issue: Wrong server URL in Swagger
 
-**Solution**: The app automatically uses `VERCEL_URL` environment variable. If it's not working:
-1. Set `NEXT_PUBLIC_API_URL` environment variable in Vercel to your deployment URL
-2. Format: `https://your-app-name.vercel.app`
+**Solution**: The app now automatically uses the current page's origin (URL). If it's still not working:
+1. Clear your browser cache
+2. Hard refresh the page (Ctrl+Shift+R or Cmd+Shift+R)
+3. Check browser console for the server URL being used
+4. As a last resort, set `NEXT_PUBLIC_API_URL` environment variable in Vercel dashboard
 
 ---
 

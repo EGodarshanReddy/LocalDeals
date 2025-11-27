@@ -1,10 +1,42 @@
 {
-  "buildCommand": "npm run build",
+  "buildCommand": "npm run build:prod",
   "outputDirectory": ".next",
   "installCommand": "npm install",
+  "devCommand": "npm run dev",
+  "framework": "nextjs",
   "env": {
+    "DATABASE_URL": {
+      "description": "PostgreSQL connection string for production database"
+    },
+    "SMTP_HOST": {
+      "description": "SMTP server hostname (e.g., smtp.gmail.com)"
+    },
+    "SMTP_PORT": {
+      "description": "SMTP server port (usually 587 or 465)"
+    },
+    "SMTP_USER": {
+      "description": "SMTP authentication username/email"
+    },
+    "SMTP_PASS": {
+      "description": "SMTP authentication password"
+    },
+    "SMTP_SECURE": {
+      "description": "Use SMTP secure connection (true/false)"
+    },
+    "EMAIL_FROM": {
+      "description": "Default sender email address"
+    },
+    "NODE_ENV": {
+      "description": "Environment type (production/development)"
+    },
     "NEXT_PUBLIC_API_URL": {
-      "description": "Public API URL for Swagger UI and client requests"
+      "description": "Public API URL for Swagger UI and client requests (optional - auto-detects VERCEL_URL if not set)"
     }
-  }
+  },
+  "buildModifiers": [
+    {
+      "path": "src",
+      "pattern": "**"
+    }
+  ]
 }

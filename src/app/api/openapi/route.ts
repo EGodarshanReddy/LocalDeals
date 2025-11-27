@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSwaggerSpec } from '@/lib/swagger';
 
+// Force dynamic rendering for Vercel serverless
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 export async function GET(req: NextRequest) {
   try {
     const spec = getSwaggerSpec();

@@ -31,6 +31,22 @@ export default function SwaggerPage() {
         return res.json();
       })
       .then((data) => {
+        // CRITICAL FIX: Override server URL with current origin for Vercel deployments
+        // This ensures the Swagger UI uses the correct URL at runtime, not build time
+        const currentOrigin = typeof window !== 'undefined' ? window.location.origin : '';
+        
+        if (data.servers && data.servers.length > 0) {
+          data.servers[0].url = currentOrigin;
+          console.log('[Swagger] Server URL set to:', currentOrigin);
+        } else {
+          data.servers = [
+            {
+              url: currentOrigin,
+              description: 'Current server',
+            },
+          ];
+        }
+        
         setSpec(data);
         setLoading(false);
         setError(null);

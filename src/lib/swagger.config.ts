@@ -1,17 +1,27 @@
-const getServerUrl = () => {
+const getServerUrl = (): string => {
+  // Priority 1: Explicitly set public API URL (works at runtime)
   if (process.env.NEXT_PUBLIC_API_URL) {
+    console.log('[Swagger] Using NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL);
     return process.env.NEXT_PUBLIC_API_URL;
   }
   
-  // For Vercel deployments, use the VERCEL_URL
+  // Priority 2: Vercel URL (only available at build time)
   if (process.env.VERCEL_URL) {
     const protocol = process.env.VERCEL_ENV === 'production' ? 'https' : 'http';
-    console.log('Using protocol:',protocol);
-    console.log('Using VERCEL_URL for Swagger server URL:', process.env.VERCEL_URL);
-    return `${protocol}://${process.env.VERCEL_URL}`;
+    const url = `${protocol}://${process.env.VERCEL_URL}`;
+    console.log('[Swagger] Using VERCEL_URL:', url);
+    return url;
   }
   
-  // Default to localhost for development
+  // Priority 3: Try to detect from window location (client-side only)
+  if (typeof window !== 'undefined') {
+    const url = window.location.origin;
+    console.log('[Swagger] Using window.location.origin:', url);
+    return url;
+  }
+  
+  // Priority 4: Default to localhost for development
+  console.log('[Swagger] Using default localhost URL');
   return 'http://localhost:3000';
 };
 
